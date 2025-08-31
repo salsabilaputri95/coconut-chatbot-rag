@@ -164,19 +164,6 @@ coconut-bluebook-rag/
    python server.py
    ```
 
-
-## 📝 Evaluasi
-
-Untuk menjalankan evaluasi sistem:
-
-1. **Jalankan notebook evaluasi**
-   ```bash
-   cd percobaan\ 2
-   jupyter notebook evaluasi.ipynb
-   ```
-
-2. **Jalankan semua sel** di notebook untuk melihat hasil evaluasi lengkap
-
 ## 📚 Referensi
 
 - LangChain Documentation: https://python.langchain.com/
