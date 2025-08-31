@@ -86,13 +86,11 @@ Sistem ini telah dievaluasi menggunakan berbagai metrik untuk retrieval dan gene
 - **BLEU**: 0.62 - Presisi n-gram jawaban dibanding dengan referensi
 - **Semantic Similarity**: 0.85 - Kesamaan makna menggunakan model embedding
 
-Evaluasi lengkap dapat dilihat dalam notebook `percobaan 2/evaluasi.ipynb`.
 
 ## 🔧 Struktur Proyek
 
 ```
 coconut-bluebook-rag/
-├── rag_implementation.ipynb    # Notebook implementasi awal RAG
 ├── percobaan 2/
 │   ├── data/
 │   │   ├── evaluation_dataset.json    # Dataset untuk evaluasi
