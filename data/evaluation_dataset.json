@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "question": "Bagaimana mekanisme perekrutan anggota COCONUT?",
+    "reference_answer": "Mekanisme perekrutan terdiri dari 4 tahap: (1) Pendaftaran online, (2) Seleksi administrasi, (3) Tes tertulis, (4) Wawancara. Proses diakhiri dengan prosesi simbolis untuk anggota yang diterima.",
+    "relevant_docs": [
+      "bluebook_recruitment.pdf",
+      "membership_guidelines.pdf"
+    ]
+  },
+  {
+    "id": 2,
+    "question": "Apa itu program INESA?",
+    "reference_answer": "INESA (Inovasi dan Edukasi Desa) adalah program unggulan COCONUT yang fokus pada pemberdayaan masyarakat desa melalui teknologi. Program ini melibatkan implementasi IoT dan pelatihan digital.",
+    "relevant_docs": [
+      "program_inesa.pdf",
+      "annual_report_2023.pdf"
+    ]
+  },
+  {
+    "id": 3,
+    "question": "Apa saja kriteria penilaian dalam seleksi anggota?",
+    "reference_answer": "Kriteria penilaian meliputi: (1) Kemampuan teknis (40%), (2) Logika & pemecahan masalah (30%), (3) Minat teknologi (20%), (4) Kepribadian (10%).",
+    "relevant_docs": [
+      "selection_criteria.pdf",
+      "evaluation_guidelines.pdf"
+    ]
+  },
+  {
+    "id": 4,
+    "question": "Bagaimana struktur organisasi COCONUT?",
+    "reference_answer": "Struktur organisasi terdiri dari: (1) Ketua, (2) Wakil Ketua, (3) Sekretaris, (4) Bendahara, (5) Divisi-divisi teknis (AI, Web, IoT, Cybersecurity).",
+    "relevant_docs": [
+      "organization_structure.pdf",
+      "operational_handbook.pdf"
+    ]
+  },
+  {
+    "id": 5,
+    "question": "Apa tujuan utama COCONUT Academy?",
+    "reference_answer": "COCONUT Academy bertujuan untuk mengembangkan kompetensi teknis anggota melalui pelatihan intensif tentang teknologi terkini seperti AI, cloud computing, dan cybersecurity.",
+    "relevant_docs": [
+      "academy_handbook.pdf",
+      "training_guidelines.pdf"
+    ]
+  }
+]

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COCONUT RAG Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        html, body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #111827;
+            color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+            position: relative;
+        }
+        
+        main {
+            height: 100vh;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+        
+        #chat-container {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; 
+            padding-bottom: 120px; 
+            scroll-behavior: smooth; 
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #0c4a6e 0%, #4c1d95 100%);
+        }
+        
+        .message-enter {
+            animation: messageEnter 0.3s ease-out forwards;
+        }
+        
+        @keyframes messageEnter {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .chat-container {
+            scrollbar-width: thin;
+            scrollbar-color: #4b5563 #1f2937;
+        }
+        
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-container::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 3px;
+        }
+        
+        .source-item {
+            transition: all 0.2s ease;
+        }
+        
+        .source-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .error-message {
+            color: #ef4444;
+            background-color: #fee2e2;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        /* Logo styling */
+        .logo-circle {
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        
+        .logo-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .user-bubble {
+            background: linear-gradient(135deg, #0369a1, #6d28d9);
+        }
+        
+        .bot-bubble {
+            background-color: #1f2937;
+        }
+        
+        .send-btn {
+            background: linear-gradient(135deg, #0284c7, #7c3aed);
+        }
+        
+        .loading-dot {
+            animation: pulse 1.5s infinite;
+        }
+        
+        .loading-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .loading-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(0.9);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+        }
+        
+        .fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+        }
+        
+        .fixed-input {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+        }
+                #sources-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        #sources-list::-webkit-scrollbar-track {
+            background: rgba(31, 41, 55, 0.7);
+        }
+        
+        #sources-list::-webkit-scrollbar-thumb {
+            background-color: rgba(75, 85, 99, 0.8);
+            border-radius: 2px;
+        }
+
+        #scroll-bottom-btn {
+            opacity: 0.8;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        
+        #scroll-bottom-btn:hover {
+            opacity: 1;
+            transform: translateY(-2px);
+        }
+
+        .glassmorphism {
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <header class="gradient-bg py-4 px-6 flex items-center justify-between shadow-lg fixed top-0 left-0 right-0 z-50">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 logo-circle">
+                <img src="logo.png" alt="COCONUT Logo" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-xl font-bold">COCONUT Computer Club Assistant</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button id="export-btn" class="p-2 rounded-full hover:bg-white/10 transition-colors" title="Ekspor Percakapan">
+                <i class="fas fa-file-export"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col"> 
+        <div class="flex-1 flex flex-col h-full">
+            <div id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 chat-container"> 
+                <div class="message-enter flex justify-start">
+                    <div class="max-w-[85%] bot-bubble p-4 rounded-2xl rounded-tl-none">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <div class="w-6 h-6 logo-circle">
+                                <img src="logo.png" alt="COCONUT Logo" class="w-full h-full object-cover">
+                            </div>
+                            <span class="text-sm font-semibold">COCONUT Assistant</span>
+                        </div>
+                        <p>Hai! Saya adalah asisten study club COCONUT Computer Club. Tanyakan apapun tentang COCONUT Computer Club saya akan menjawabnya berdarkan data dari Bluebook  COCONUT Computer Club.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area-fixed p-4 border-t border-gray-700 bg-gray-800/90 backdrop-blur-md fixed bottom-0 left-0 right-0 z-50 shadow-lg">
+                <div id="sources-container" class="mb-3 p-3 bg-gray-700/90 rounded-lg hidden">
+                    <h4 id="sources-toggle" class="text-sm font-semibold mb-2 flex items-center cursor-pointer hover:text-blue-400 transition-colors">
+                        <i class="fas fa-book mr-2 text-blue-400"></i> Sumber Referensi: 
+                        <i class="fas fa-chevron-down ml-2 text-xs transition-transform" id="sources-chevron"></i>
+                    </h4>
+                    <ul id="sources-list" class="text-xs space-y-1 mt-2 hidden max-h-[120px] overflow-y-auto pr-2">
+                    </ul>
+                </div>
+
+                <div class="flex space-x-2">
+                    <div class="flex-1 relative">
+                        <input 
+                            type="text" 
+                            id="user-input" 
+                            placeholder="Ketik pertanyaan Anda..." 
+                            class="w-full bg-gray-700/50 border border-gray-600 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 pl-10"
+                        >
+                        <i class="fas fa-comment-dots absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <button 
+                        id="send-btn" 
+                        class="send-btn text-white rounded-2xl px-5 py-3 font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center"
+                    >
+                        <i class="fas fa-paper-plane mr-2"></i> Kirim
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <button id="scroll-bottom-btn" class="fixed right-4 bottom-24 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-3 shadow-lg z-50 hidden transition-opacity duration-300">
+        <i class="fas fa-chevron-down"></i>
+    </button>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const sourcesContainer = document.getElementById('sources-container');
+        const sourcesList = document.getElementById('sources-list');
+        const exportBtn = document.getElementById('export-btn');
+        const scrollBottomBtn = document.getElementById('scroll-bottom-btn');
+
+        let chatHistory = [];
+
+        function init() {
+            setupEventListeners();
+            userInput.focus();
+            
+            document.querySelector('header').classList.add('glassmorphism');
+            const inputArea = document.querySelector('.input-area-fixed');
+            if (inputArea) {
+                inputArea.classList.add('glassmorphism');
+            }
+            
+            adjustChatContainerSize();
+            window.addEventListener('resize', adjustChatContainerSize);
+        }
+
+        function adjustChatContainerSize() {
+            const headerHeight = document.querySelector('header').offsetHeight;
+            const inputArea = document.querySelector('.input-area-fixed');
+            const inputAreaHeight = inputArea ? inputArea.offsetHeight : 80; 
+            const chatContainer = document.getElementById('chat-container');
+            
+            // Sesuaikan tinggi area chat
+            const mainContent = document.querySelector('main');
+            mainContent.style.paddingTop = `${headerHeight}px`;
+            mainContent.style.paddingBottom = `0`; 
+            
+            
+            chatContainer.style.height = `calc(100vh - ${headerHeight}px)`;
+            
+        
+            chatContainer.style.paddingBottom = `${inputAreaHeight + 50}px`;
+            
+            scrollToBottom();
+        }
+        
+        // Fungsi untuk scroll ke bagian bawah chat
+        function scrollToBottom() {
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            scrollBottomBtn.classList.add('hidden');
+        }
+        
+        // Fungsi untuk memeriksa posisi scroll
+        function checkScroll() {
+            const chatContainer = document.getElementById('chat-container');
+            const scrollPosition = chatContainer.scrollTop + chatContainer.clientHeight;
+            const scrollHeight = chatContainer.scrollHeight;
+            
+            if (scrollHeight - scrollPosition > 50) {
+                scrollBottomBtn.classList.remove('hidden');
+            } else {
+                scrollBottomBtn.classList.add('hidden');
+            }
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Chat input
+            userInput.addEventListener('input', () => {
+                sendBtn.disabled = userInput.value.trim() === '';
+            });
+
+            userInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !sendBtn.disabled) {
+                    sendMessage();
+                }
+            });
+
+            sendBtn.addEventListener('click', sendMessage);
+
+            // Export chat
+            exportBtn.addEventListener('click', exportChat);
+            
+            // Scroll to bottom button
+            scrollBottomBtn.addEventListener('click', scrollToBottom);
+            
+            // Listen untuk scroll event pada chat container
+            chatContainer.addEventListener('scroll', checkScroll);
+            
+            // Toggle sources visibility
+            const sourcesToggle = document.getElementById('sources-toggle');
+            const sourcesChevron = document.getElementById('sources-chevron');
+            
+            sourcesToggle.addEventListener('click', () => {
+                const sourcesList = document.getElementById('sources-list');
+                if (sourcesList.classList.contains('hidden')) {
+                    sourcesList.classList.remove('hidden');
+                    sourcesChevron.classList.add('transform', 'rotate-180');
+                } else {
+                    sourcesList.classList.add('hidden');
+                    sourcesChevron.classList.remove('transform', 'rotate-180');
+                }
+                
+                // Re-adjust container size setelah toggle sources
+                setTimeout(() => {
+                    adjustChatContainerSize();
+                }, 50); // Delay kecil untuk animasi
+            });
+        }
+
+        // Chat Functions
+        function addMessageToChat(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message-enter', 'flex');
+            messageElement.classList.add(sender === 'user' ? 'justify-end' : 'justify-start');
+            
+            const messageBubble = document.createElement('div');
+            messageBubble.classList.add('max-w-[85%]', 'p-4', 'rounded-2xl');
+            
+            if (sender === 'user') {
+                messageBubble.classList.add('user-bubble', 'rounded-tr-none');
+            } else {
+                messageBubble.classList.add('bot-bubble', 'rounded-tl-none');
+            }
+            
+            if (sender === 'bot') {
+                const botHeader = document.createElement('div');
+                botHeader.classList.add('flex', 'items-center', 'space-x-2', 'mb-1');
+                botHeader.innerHTML = `
+                    <div class="w-6 h-6 logo-circle">
+                        <img src="logo.png" alt="COCONUT Logo" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-sm font-semibold">COCONUT Assistant</span>
+                `;
+                messageBubble.appendChild(botHeader);
+            }
+            
+            const messageText = document.createElement('p');
+            messageText.textContent = message;
+            messageBubble.appendChild(messageText);
+            
+            messageElement.appendChild(messageBubble);
+            chatContainer.appendChild(messageElement);
+            
+            // Scroll to bottom menggunakan fungsi
+            scrollToBottom();
+        }
+
+        function showSources(sources) {
+            if (!sources || sources.length === 0) {
+                sourcesContainer.classList.add('hidden');
+                return;
+            }
+            
+            sourcesList.innerHTML = '';
+            
+            let combinedSources = [];
+            
+            sources.forEach(source => {
+                if (/\d+\.\s+\*\*.*?\*\*/.test(source)) {
+                    // Split pada pola nomor list (seperti "1. ", "2. ", dst)
+                    const listItems = source.split(/(?=\d+\.\s+\*\*)/);
+                    listItems.filter(item => item.trim()).forEach(item => {
+                        combinedSources.push(item.trim());
+                    });
+                } else {
+                    combinedSources.push(source);
+                }
+            });
+            
+            combinedSources.forEach((source, index) => {
+                // Memformat sumber dan menghapus tanda markdown
+                let formattedSource = source;
+                
+                // Hapus format markdown list (seperti 1., 2., - dll)
+                formattedSource = formattedSource.replace(/^\d+\.\s+/g, '');
+                
+                // Hapus format markdown bold dengan menyimpan konten
+                formattedSource = formattedSource.replace(/\*\*(.*?)\*\*/g, (match, content) => {
+                    return `<strong>${content}:</strong> `;
+                });
+                
+                const li = document.createElement('li');
+                li.classList.add('source-item', 'flex', 'items-start', 'py-1');
+                li.innerHTML = `
+                    <span class="bg-gray-600 text-xs rounded-full w-5 h-5 flex items-center justify-center mr-2 mt-0.5">${index + 1}</span>
+                    <span>${formattedSource}</span>
+                `;
+                sourcesList.appendChild(li);
+            });
+            
+            sourcesContainer.classList.remove('hidden');
+        }
+
+        // Fungsi untuk memecah sumber referensi yang mungkin dalam format list atau campuran
+        function parseSourceReferences(sources) {
+            if (!sources || sources.length === 0) return [];
+            
+            // Array untuk menyimpan hasil parsing
+            let parsedSources = [];
+            
+            sources.forEach(source => {
+                const listRegex = /(\d+\.\s+\*\*.*?\*\*.*?)(?=\s+\d+\.\s+\*\*|\s*$)/g;
+                const matchesList = Array.from(source.matchAll(listRegex));
+                
+                if (matchesList && matchesList.length > 0) {
+                    matchesList.forEach(match => {
+                        parsedSources.push(match[1].trim());
+                    });
+                } else {
+                    // Jika tidak terdeteksi sebagai format list, tambahkan langsung
+                    parsedSources.push(source);
+                }
+            });
+            
+            return parsedSources;
+        }
+        
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+            
+            console.log("Mengirim pesan:", message);
+            
+            // Add user message to chat
+            addMessageToChat(message, 'user');
+            chatHistory.push({ role: 'user', content: message });
+            
+            // Clear input and disable button
+            userInput.value = '';
+            sendBtn.disabled = true;
+            
+            // Show loading indicator
+            const loadingElement = document.createElement('div');
+            loadingElement.classList.add('flex', 'justify-start', 'message-enter');
+            loadingElement.innerHTML = `
+                <div class="max-w-[85%] bot-bubble p-4 rounded-2xl rounded-tl-none">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-6 h-6 logo-circle">
+                            <img src="logo.png" alt="COCONUT Logo" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex space-x-1">
+                            <div class="loading-dot w-2 h-2 bg-gray-400 rounded-full"></div>
+                            <div class="loading-dot w-2 h-2 bg-gray-400 rounded-full"></div>
+                            <div class="loading-dot w-2 h-2 bg-gray-400 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatContainer.appendChild(loadingElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            try {
+                console.log("Mengirim request ke server...");
+                const response = await fetch('/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question: message })
+                });
+                
+                console.log("Menerima response:", response.status);
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log("Data response:", data);
+                
+                // Remove loading indicator
+                chatContainer.removeChild(loadingElement);
+                
+                // Add bot response to chat
+                addMessageToChat(data.answer, 'bot');
+                chatHistory.push({ role: 'bot', content: data.answer });
+                
+                // Show sources if available
+                if (data.sources && data.sources.length > 0) {
+                    const parsedSources = parseSourceReferences(data.sources);
+                    showSources(parsedSources);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                chatContainer.removeChild(loadingElement);
+                addMessageToChat('Maaf, terjadi kesalahan. Silakan coba lagi.', 'bot');
+                
+                // Tampilkan error detail
+                const errorElement = document.createElement('div');
+                errorElement.classList.add('error-message', 'mt-2');
+                errorElement.textContent = `Error: ${error.message}`;
+                chatContainer.appendChild(errorElement);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+
+        function exportChat() {
+            let chatText = "COCONUT RAG Assistant Chat History\n\n";
+            
+            chatHistory.forEach(entry => {
+                const prefix = entry.role === 'user' ? "Anda: " : "Asisten: ";
+                chatText += `${prefix}${entry.content}\n\n`;
+            });
+            
+            const blob = new Blob([chatText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `coconut-chat-${new Date().toISOString().slice(0, 10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 100);
+        }
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>
